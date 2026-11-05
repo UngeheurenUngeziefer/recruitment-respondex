@@ -4,18 +4,20 @@ import com.platform.shared.Tenant;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Резерв бюджета (раздел 4.3 архитектуры). Ключевая идея: условный UPDATE не даёт выйти за лимит
- * даже при параллельных запросах, а CHECK в БД — страховка на случай ошибки в коде.
+ * Reserves budget (architecture section 4.3). The conditional UPDATE prevents exceeding the limit
+ * even under concurrent requests, while the database CHECK protects against code errors.
  */
 @Service
+@Profile("!demo")
 public class BudgetService {
 
-    /** 0 строк = лимит исчерпан. Никакого SELECT-then-UPDATE. */
+    /** Zero updated rows means the limit is exhausted; avoid SELECT-then-UPDATE. */
     private static final String RESERVE_SQL = """
             update budget_account
                set reserved_amount = reserved_amount + :amount,
@@ -44,12 +46,12 @@ public class BudgetService {
     }
 
     /**
-     * Резервирует сумму на всех перечисленных счетах в одной транзакции.
+    * Reserves an amount across all listed accounts in one transaction.
      *
-     * @param accountIds счета в фиксированном порядке блокировки: ORG, затем STUDY, затем CAMPAIGN.
-     *                   Единый порядок исключает deadlock между параллельными резервами.
-     * @return true, если резерв применён сейчас; false, если такая операция уже была применена (идемпотентность).
-     * @throws BudgetLimitExceededException если хотя бы один счёт не может принять сумму (откат всей операции).
+    * @param accountIds accounts in a fixed lock order: ORG, then STUDY, then CAMPAIGN.
+    *                   A consistent order prevents deadlocks between concurrent reservations.
+    * @return true if the reservation was applied now; false if the operation was already applied (idempotency).
+    * @throws BudgetLimitExceededException if any account cannot accept the amount (the whole operation rolls back).
      */
     public boolean reserve(UUID orgId, UUID actorId, String opKey, BigDecimal amount,
                            String refType, UUID refId, List<UUID> accountIds) {
@@ -69,7 +71,7 @@ public class BudgetService {
                         .param("id", accountId)
                         .update();
                 if (updated == 0) {
-                    // RuntimeException откатит все предыдущие UPDATE этой транзакции
+                    // RuntimeException rolls back all previous updates in this transaction.
                     throw new BudgetLimitExceededException(accountId);
                 }
                 jdbc.sql(INSERT_ENTRY_SQL)

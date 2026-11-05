@@ -1,6 +1,6 @@
--- Роли БД. Выполняется администратором один раз на окружение (не миграцией).
--- app_rt: роль приложения. Не владелец таблиц, не superuser, не BYPASSRLS -> RLS действует.
--- app_worker: фоновые задачи между организациями (outbox, сверка). Использование логируется.
+-- Database roles. Run once per environment by an administrator (not as a migration).
+-- app_rt: application role; not a table owner, superuser, or BYPASSRLS role, so RLS applies.
+-- app_worker: cross-organization background jobs (outbox, reconciliation); usage is logged.
 
 DO $$
 BEGIN
@@ -18,6 +18,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON
   session, session_moderator
 TO app_rt;
 
--- audit_event: только INSERT и SELECT. UPDATE/DELETE отозваны, и есть триггер.
+-- audit_event: INSERT and SELECT only. UPDATE/DELETE are revoked, with a trigger as a second guard.
 GRANT SELECT, INSERT ON audit_event TO app_rt;
 GRANT USAGE ON SEQUENCE audit_event_id_seq TO app_rt;

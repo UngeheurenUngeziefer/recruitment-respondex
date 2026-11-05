@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 
 /**
- * Проверяет границы модулей: модуль не импортирует внутренние классы другого модуля.
- * Модули: shared, audit, budget, study (см. раздел 3.1 архитектуры).
+ * Verifies module boundaries: a module must not import another module's internal classes.
+ * Modules: shared, audit, budget, and study (see architecture section 3.1).
  */
 class ModularityTest {
 

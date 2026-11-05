@@ -5,13 +5,15 @@ import com.platform.shared.Tenant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
-public class StudyService {
+@Profile("!demo")
+public class StudyService implements StudyOperations {
 
     private final JdbcClient jdbc;
     private final TransactionTemplate tx;

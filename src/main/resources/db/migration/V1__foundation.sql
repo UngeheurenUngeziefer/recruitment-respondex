@@ -1,9 +1,9 @@
--- V1: фундамент платформы (см. Architecture-and-UX.md, разделы 4.1, 4.3, 4.5, 4.9)
--- Миграции выполняются владельцем схемы (не app_rt). Роль приложения создаётся в db/roles.sql.
+-- V1: platform foundation (see Architecture-and-UX.md sections 4.1, 4.3, 4.5, and 4.9).
+-- Migrations run as the schema owner, not app_rt. The application role is created in db/roles.sql.
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
--- ---------------------------------------------------------------- организации и пользователи
+-- ---------------------------------------------------------------- organizations and users
 
 CREATE TABLE organization (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -11,7 +11,7 @@ CREATE TABLE organization (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
--- Глобальная таблица (не тенант-зависимая): один человек может состоять в нескольких организациях.
+-- Global table (not tenant-scoped): one person can belong to multiple organizations.
 CREATE TABLE app_user (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email       text NOT NULL UNIQUE,
@@ -27,7 +27,7 @@ CREATE TABLE membership (
   PRIMARY KEY (org_id, user_id)
 );
 
--- ---------------------------------------------------------------- исследования
+-- ---------------------------------------------------------------- studies
 
 CREATE TABLE study (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -43,7 +43,7 @@ CREATE TABLE study (
   updated_at           timestamptz NOT NULL DEFAULT now()
 );
 
--- ---------------------------------------------------------------- бюджет и ledger (4.3)
+-- ---------------------------------------------------------------- budget and ledger (4.3)
 
 CREATE TABLE budget_account (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -56,7 +56,7 @@ CREATE TABLE budget_account (
   spent_amount    numeric(14,2) NOT NULL DEFAULT 0 CHECK (spent_amount >= 0),
   version         bigint NOT NULL DEFAULT 0,
   UNIQUE (org_id, scope_type, scope_id),
-  -- страховка на уровне БД: даже если условный UPDATE в коде окажется ошибочным, перерасход невозможен
+  -- Database guardrail: even if the conditional UPDATE is incorrect, overspending is impossible.
   CHECK (reserved_amount + spent_amount <= limit_amount)
 );
 
@@ -74,9 +74,9 @@ CREATE TABLE budget_entry (
   created_at       timestamptz NOT NULL DEFAULT now()
 );
 
--- ---------------------------------------------------------------- бронирование (4.5)
--- Исправлено по ревью: сессия не хранит один moderator_id. Занятость модераторов вынесена
--- в session_moderator, на котором и стоит exclusion-ограничение.
+-- ---------------------------------------------------------------- scheduling (4.5)
+-- Review adjustment: a session does not store a single moderator_id. Moderator availability is
+-- stored in session_moderator, which owns the exclusion constraint.
 
 CREATE TABLE session (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -89,8 +89,8 @@ CREATE TABLE session (
   CHECK (ends_at > starts_at)
 );
 
--- busy = [starts_at - buffer_before, ends_at + buffer_after) вычисляет приложение:
--- timestamptz + interval не IMMUTABLE, поэтому generated column здесь не подходит.
+-- The application calculates busy = [starts_at - buffer_before, ends_at + buffer_after):
+-- timestamptz + interval is not IMMUTABLE, so a generated column is not suitable here.
 CREATE TABLE session_moderator (
   session_id    uuid NOT NULL REFERENCES session(id),
   org_id        uuid NOT NULL REFERENCES organization(id),
@@ -101,7 +101,7 @@ CREATE TABLE session_moderator (
   EXCLUDE USING gist (moderator_id WITH =, busy WITH &&) WHERE (active)
 );
 
--- ---------------------------------------------------------------- outbox (раздел 1, 3.2)
+-- ---------------------------------------------------------------- outbox (sections 1 and 3.2)
 
 CREATE TABLE outbox_event (
   id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -115,7 +115,7 @@ CREATE TABLE outbox_event (
 );
 CREATE INDEX outbox_pending_idx ON outbox_event (next_attempt_at) WHERE status = 'PENDING';
 
--- ---------------------------------------------------------------- аудит, append-only (4.9)
+-- ---------------------------------------------------------------- audit, append-only (4.9)
 
 CREATE TABLE audit_event (
   id            bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -141,8 +141,8 @@ CREATE TRIGGER audit_event_append_only
   FOR EACH ROW EXECUTE FUNCTION audit_forbid_change();
 
 -- ---------------------------------------------------------------- RLS (4.1)
--- FORCE нужен, чтобы RLS действовал и на владельца таблицы.
--- nullif(...) делает пустой контекст безопасным: без org_id строки не видны и не вставляются.
+-- FORCE makes RLS apply to the table owner as well.
+-- nullif(...) makes an empty context safe: without org_id, rows cannot be read or inserted.
 
 ALTER TABLE organization ENABLE ROW LEVEL SECURITY;
 ALTER TABLE organization FORCE ROW LEVEL SECURITY;

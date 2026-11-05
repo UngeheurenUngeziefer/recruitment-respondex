@@ -18,7 +18,7 @@
 
   <properties>
     <java.version>21</java.version>
-    <!-- Версия Spring Modulith согласуется с Boot 3.3; при первой сборке проверить по BOM. -->
+    <!-- Spring Modulith is aligned with Boot 3.3; verify the BOM on the first build. -->
     <spring-modulith.version>1.2.5</spring-modulith.version>
   </properties>
 

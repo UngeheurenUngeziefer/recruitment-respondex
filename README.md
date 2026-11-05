@@ -1,68 +1,58 @@
-# recrut-platform — скелет MVP
+# Recruitment Respondex
 
-Реализация первой части архитектуры из `Architecture-and-UX.md`: фундамент, RLS, ledger бюджета, модуль исследований.
+An MVP backend and UI prototype for a respondent recruitment platform. The Java API uses Spring Boot, PostgreSQL, tenant isolation with row-level security (RLS), a budget ledger, and modular application boundaries.
 
-## Что внутри
+## Project Contents
 
-| Путь | Что это | Статус проверки |
-|---|---|---|
-| `src/main/resources/db/migration/V1__foundation.sql` | Схема: организации, membership, study, budget ledger, session + session_moderator (exclusion), outbox, audit (append-only), RLS на всех тенант-таблицах | **Применена и проверена** на PostgreSQL 16 |
-| `db/roles.sql` | Роль приложения `app_rt` (не владелец, без BYPASSRLS) и гранты | **Применена и проверена** |
-| `db/tests/invariants.sql` | 8 групп проверок инвариантов: изоляция RLS, WITH CHECK, условный резерв, CHECK бюджета, exclusion с буферами, append-only аудит | **Все проверки проходят** (10 утверждений) |
-| `src/main/java/com/platform/budget/` | `BudgetService.reserve`: условный UPDATE, идемпотентность, откат всей операции при отказе | Написано, **не компилировалось** |
-| `src/main/java/com/platform/study/` | Создание и список исследований с RLS и записью аудита | Написано, **не компилировалось** |
-| `src/main/java/com/platform/audit/`, `shared/` | `AuditRecorder`, `Tenant.bind` (set_config в транзакции) | Написано, **не компилировалось** |
-| `src/test/java/com/platform/ModularityTest.java` | Spring Modulith: проверка границ модулей | Написано, **не запускалось** |
+- `src/main/resources/db/migration/V1__foundation.sql`: PostgreSQL schema for organizations, studies, budgets, sessions, outbox events, audit records, and tenant RLS policies.
+- `db/roles.sql`: grants for the restricted `app_rt` application role.
+- `db/tests/invariants.sql`: database checks for tenant isolation, budget limits, scheduling conflicts, and append-only audit records.
+- `src/main/java/com/platform/`: Spring Boot API modules for studies, budgets, audit, and tenant context.
+- `src/main/resources/static/index.html`: bundled UI prototype served by the application.
 
-## Что изменено относительно документа (по итогам ревью)
+## Run Without PostgreSQL
 
-- **Booking:** exclusion-ограничение перенесено с `session.moderator_id` на `session_moderator`, где модераторов может быть несколько. Буферы учитываются в колонке `busy` (интервал), которую считает приложение.
-- **RLS:** добавлены `WITH CHECK` (нельзя вставить строку в чужую организацию) и `FORCE ROW LEVEL SECURITY` (политика действует и на владельца таблицы).
-- **Бюджет:** добавлен CHECK `reserved + spent <= limit` как страховка на уровне БД.
-
-## Что не сделано
-
-- **Аутентификация.** Контекст организации берётся из заголовков `X-Org-Id` и `X-User-Id`. Это заглушка для разработки. Нужен Spring Security с проверкой membership.
-- **Права по матрице из PRD.** Не реализованы, нужна модель permissions.
-- **Outbox-воркер, Google Ads, Calendar, email.** Таблица `outbox_event` есть, обработчиков нет.
-- **Публичный путь кандидата и фронтенд.** Не начаты.
-- **Java-тесты.** Не запускались. Нужны Testcontainers (Docker) и доступ к Maven Central.
-
-## Как запустить
-
-### 1. База данных
+The default `demo` profile starts without a database. Open `http://localhost:8080/` for the UI. The study API uses in-memory storage, so its data is cleared when the application restarts.
 
 ```bash
-createdb recrut
-# от владельца схемы (роль recrut_owner)
-psql -d recrut -f src/main/resources/db/migration/V1__foundation.sql
-# от администратора, один раз на окружение
-psql -d recrut -f db/roles.sql
-# проверки инвариантов (от суперпользователя, на пустой БД)
-psql -d recrut -v ON_ERROR_STOP=1 -f db/tests/invariants.sql
-```
-
-### 2. Приложение
-
-```bash
-export DB_URL=jdbc:postgresql://localhost:5432/recrut
-export DB_APP_PASSWORD=...        # пароль app_rt
-export DB_OWNER_USER=recrut_owner
-export DB_OWNER_PASSWORD=...
 mvn spring-boot:run
 ```
 
-Пример запроса:
+## Run With PostgreSQL
+
+Provision PostgreSQL and the database roles, then apply the schema and grants:
+
+```bash
+createdb recrut
+psql -d recrut -f src/main/resources/db/migration/V1__foundation.sql
+psql -d recrut -f db/roles.sql
+psql -d recrut -v ON_ERROR_STOP=1 -f db/tests/invariants.sql
+```
+
+Set database credentials through environment variables and activate the `postgres` profile:
+
+```bash
+export DB_URL=jdbc:postgresql://localhost:5432/recrut
+export DB_APP_PASSWORD=...
+export DB_OWNER_USER=recrut_owner
+export DB_OWNER_PASSWORD=...
+mvn spring-boot:run -Dspring-boot.run.profiles=postgres
+```
+
+The schema owner role and role passwords must be provisioned for your environment. `db/roles.sql` creates grants for `app_rt`; it does not set passwords.
+
+Example request:
 
 ```bash
 curl -X POST localhost:8080/api/v1/studies \
   -H 'Content-Type: application/json' \
   -H 'X-Org-Id: 00000000-0000-0000-0000-00000000000a' \
   -H 'X-User-Id: 00000000-0000-0000-0000-0000000000a1' \
-  -d '{"title":"Интервью про онлайн-банкинг","sessionDurationMin":60,"targetN":15}'
+  -d '{"title":"Online banking interviews","sessionDurationMin":60,"targetN":15}'
 ```
 
-## Версии, которые нужно проверить при первой сборке
+## Tests and Limitations
 
-- Spring Boot 3.3.5 и Spring Modulith 1.2.5 в `pom.xml`. Версию Modulith сверить с BOM, которая совместима с Boot 3.3.
-- Версии Flyway и Testcontainers берутся из BOM Boot.
+Run Java tests with `mvn test`. Database invariant checks in `db/tests/invariants.sql` require a configured PostgreSQL database.
+
+Authentication is not implemented. The API currently accepts organization and user IDs from request headers for development only; production use requires verified identities and membership checks. Permissions, outbox workers, external integrations, and a production frontend are also not implemented.

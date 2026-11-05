@@ -3,14 +3,16 @@ package com.platform.audit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 /**
- * Пишет в append-only журнал аудита. Вызывать в той же транзакции, что и изменение,
- * тогда запись аудита и само изменение либо фиксируются вместе, либо откатываются вместе.
+ * Writes to the append-only audit log. Call it in the same transaction as the change
+ * so the audit record and the change either commit or roll back together.
  */
 @Component
+@Profile("!demo")
 public class AuditRecorder {
 
     private final JdbcClient jdbc;

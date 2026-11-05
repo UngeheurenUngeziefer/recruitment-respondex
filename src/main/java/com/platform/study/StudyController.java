@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * ВНИМАНИЕ: контекст (X-Org-Id, X-User-Id) берётся из заголовков только для разработки.
- * До продакшена заменить на Spring Security: организация и пользователь должны приходить
- * из проверенного токена, а принадлежность пользователя организации — проверяться по membership.
+ * WARNING: X-Org-Id and X-User-Id headers are used for development only.
+ * Before production, use Spring Security: derive the organization and user from a verified token
+ * and check the user's organization membership.
  */
 @RestController
 @RequestMapping("/api/v1/studies")
 public class StudyController {
 
-    private final StudyService studies;
+    private final StudyOperations studies;
 
-    public StudyController(StudyService studies) {
+    public StudyController(StudyOperations studies) {
         this.studies = studies;
     }
 

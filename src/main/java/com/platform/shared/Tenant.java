@@ -4,11 +4,11 @@ import java.util.UUID;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 /**
- * Привязывает организацию к текущей транзакции, чтобы сработала RLS (политика tenant_isolation).
- * set_config(..., is_local = true) действует только до конца транзакции, поэтому контекст не утекает
- * в соседние запросы из пула соединений.
+ * Binds an organization to the current transaction so the tenant_isolation RLS policy applies.
+ * set_config(..., is_local = true) only lasts until the transaction ends, preventing the context
+ * from leaking to neighboring requests that reuse a pooled connection.
  *
- * Вызывать только внутри транзакции (TransactionTemplate или @Transactional).
+ * Call only inside a transaction (TransactionTemplate or @Transactional).
  */
 public final class Tenant {
 
