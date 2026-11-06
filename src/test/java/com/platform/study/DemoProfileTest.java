@@ -31,7 +31,12 @@ class DemoProfileTest {
         mvc.perform(get("/index.html"))
             .andExpect(status().isOk())
             .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
-            .andExpect(content().string(org.hamcrest.Matchers.containsString("__bundler/template")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("css/shell.css")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("screens/dashboard.html")));
+
+        mvc.perform(get("/screens/dashboard.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML));
 
         mvc.perform(post("/api/v1/studies")
                         .header("X-Org-Id", ORG_ID)

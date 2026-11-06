@@ -1,4 +1,4 @@
-ipackage com.platform.budget;
+package com.platform.budget;
 
 import java.util.UUID;
 
