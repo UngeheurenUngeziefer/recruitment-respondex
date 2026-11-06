@@ -270,17 +270,17 @@
     <div style="font-family: Inter, system-ui, sans-serif; background: #F6F6F3; color: #1C1C1A; min-height: 820px; display: flex; flex-wrap: wrap">
         <aside style="flex: 0 0 232px; background: #FFFFFF; border-right: 1px solid #E4E4DF; padding: 24px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 4px">
             <div style="font-weight: 700; font-size: 16px; padding: 4px 12px 20px">Respondex</div>
-            <a href="Dashboard.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Dashboard</a>
-            <a href="Campaigns.dc.html" style="padding: 10px 12px; border-radius: 8px; background: #E6F2F1; color: #0F766E; font-weight: 600; font-size: 14px">Recruitment campaigns</a>
-            <a href="CRM.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Candidates</a>
-            <a href="Calendar.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Calendar</a>
-            <a href="Creatives.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Creatives</a>
-            <a href="Budget.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Ads & budget</a>
-            <a href="Rewards.dc.html" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Rewards</a>
+            <a href="../index.html#dashboard" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Dashboard</a>
+            <a href="../index.html#campaigns" target="_top" style="padding: 10px 12px; border-radius: 8px; background: #E6F2F1; color: #0F766E; font-weight: 600; font-size: 14px">Recruitment campaigns</a>
+            <a href="../index.html#candidates" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Candidates</a>
+            <a href="../index.html#calendar" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Calendar</a>
+            <a href="../index.html#creatives" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Creatives</a>
+            <a href="../index.html#ad-performance" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Ads & budget</a>
+            <a href="../index.html#rewards" target="_top" style="padding: 10px 12px; border-radius: 8px; font-size: 14px; color: #3D3D39">Rewards</a>
         </aside>
         <main style="flex: 999 1 560px; min-width: 0; padding: 28px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
             <div>
-                <a href="Campaigns.dc.html" style="font-size: 13px; color: #0F766E; font-weight: 600">← All campaigns</a>
+                <a href="../index.html#campaigns" target="_top" style="font-size: 13px; color: #0F766E; font-weight: 600">← All campaigns</a>
                 <h1 style="margin: 6px 0 0; font-size: 24px; font-weight: 700">New recruitment campaign</h1>
             </div>
             <nav style="display: flex; flex-wrap: wrap; gap: 8px">
@@ -339,3 +339,21 @@
                     <div style="display: flex; flex-direction: column; gap: 6px">
                         <label style="font-size: 13px; font-weight: 600">Audience description</label>
                         <textarea rows="4" style="border: 1px solid #D6D6D0; border-radius: 8px; padding: 12px 14px; font-size: 14px; line-height: 1.5; resize: vertical">People aged 25–45 who use online banking, live in Poland or Germany, and are willing to share their experience.</textarea>
+                        <h1 style="margin: 6px 0 0; font-size: 24px; font-weight: 700">New recruitment campaign</h1>
+                    </div>
+                    @@ -429,7 +429,7 @@ input,textarea{font-family: inherit}
+                    <section style="background: #FFFFFF; border: 1px solid #E4E4DF; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+                        <div>
+                            <div style="font-weight: 700; font-size: 16px">Reward</div>
+                            <div style="font-size: 13px; color: #5F5F5A; margin-top: 4px">Manage reward options in the <a href="Rewards.dc.html" style="color: #0F766E; font-weight: 600">Rewards</a>. Choose one option for this campaign.</div>
+                            <div style="font-size: 13px; color: #5F5F5A; margin-top: 4px">Manage reward options in the <a href="../index.html#rewards" target="_top" style="color: #0F766E; font-weight: 600">Rewards</a>. Choose one option for this campaign.</div>
+                        </div>
+                        <sc-for list="{{ rewardItems }}" as="item" hint-placeholder-count="3">
+                            <div sc-camel-on-click="{{ item.pick }}" style="{{ item.style }}; display: flex; justify-content: space-between; align-items: center; border-radius: 12px; padding: 16px 18px; cursor: pointer">
+                                @@ -459,7 +459,7 @@ input,textarea{font-family: inherit}
+                                <div style="display: flex; justify-content: space-between"><span style="color: #5F5F5A">Ads</span><span>Automatically calculated · €560</span></div>
+                            </div>
+                            <div style="font-size: 13px; color: #5F5F5A; background: #F6F6F3; border-radius: 8px; padding: 12px">Start recruiting when you are ready. Review the suggested audience, keywords, and budget, then launch the campaign.</div>
+                            <a href="../index.html#audience-ads" target="_top" style="display: block; text-align: center; padding: 14px; border-radius: 10px; background: #0F766E; color: #FFFFFF; font-size: 15px; font-weight: 600">Start recruiting →</a>
+                    </section>
+            </sc-if>

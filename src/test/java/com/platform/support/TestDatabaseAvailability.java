@@ -12,8 +12,13 @@ public final class TestDatabaseAvailability {
 
     /**
      * True if TEST_DB_URL points to a database, or if Docker is available for Testcontainers.
+     * On CI (CI=true, set by GitHub Actions) this always returns true, so a missing database makes
+     * the tests fail instead of being skipped silently.
      */
     public static boolean databaseAvailable() {
+        if ("true".equalsIgnoreCase(System.getenv("CI"))) {
+            return true;
+        }
         String externalUrl = System.getenv("TEST_DB_URL");
         if (externalUrl != null && !externalUrl.isBlank()) {
             return true;
