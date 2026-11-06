@@ -237,8 +237,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     const UUID_SHAPE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
     const pendingFrames = {}; // uuid -> [{el, frag}] awaiting text for own frames
     const pendingRelays = {}; // uuid -> [childWindow] awaiting text to pass down
+    function suppressEmbeddedNavigation(text) {
+      const marker = '<script type="__bundler/template">';
+      const start = text.indexOf(marker);
+      const scriptEnd = '</scr' + 'ipt>';
+      const end = text.indexOf(scriptEnd, start + marker.length);
+      if (start < 0 || end < 0) throw new Error('Embedded screen is missing its template');
+
+      const template = JSON.parse(text.slice(start + marker.length, end));
+      const headEnd = template.indexOf('</head>');
+      if (headEnd < 0) throw new Error('Embedded screen template is missing its head');
+      const styles = '<style>aside[style^="flex: 0 0 232px"]{display:none!important}main{flex:1 1 100%!important;width:100%!important}</style>';
+      const updatedTemplate = template.slice(0, headEnd) + styles + template.slice(headEnd);
+      const serializedTemplate = JSON.stringify(updatedTemplate).replace(/</g, '\\u003c');
+      return text.slice(0, start + marker.length) + serializedTemplate + text.slice(end);
+    }
     function mountPage(el, frag, text) {
-      const pageBlob = new Blob([text], { type: 'text/html' });
+      const pageBlob = new Blob([suppressEmbeddedNavigation(text)], { type: 'text/html' });
       const u = URL.createObjectURL(pageBlob);
       resourceBlobs[u] = pageBlob;
       el.src = u + frag;
@@ -423,7 +438,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     ];
     const screenNames = [
       'Campaigns', 'Dashboard', 'New campaign', 'Audience & ads', 'Rewards',
-      'Screening builder', 'Ad performance', 'Calendar', 'Creatives', 'Candidates', 'Candidate journey'
+      'Screening builder', 'Ads & budget', 'Calendar', 'Creatives', 'Candidates', 'Candidate journey'
     ];
     const shellStyle = document.createElement('style');
     shellStyle.textContent = `
