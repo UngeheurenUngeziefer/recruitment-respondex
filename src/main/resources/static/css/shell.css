@@ -1,0 +1,30 @@
+/* Page layout. The first block is the original bundle template style; the second is the
+   shell style that was appended at runtime. Order is kept so the cascade is unchanged. */
+html{background:#f5f4ef;color:#1f1e1d;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+body{margin:0;padding:48px;display:flex;flex-direction:column;align-items:flex-start;gap:48px}
+.board h2{margin:0 0 12px;font-size:13px;font-weight:500;color:#6b6a68}
+.board iframe{display:block;border:0;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #f1f3f2; color: #242927; font: 14px/1.4 Inter, system-ui, sans-serif; }
+.prototype-app { display: grid; width: 100%; height: 100%; grid-template-columns: 224px minmax(0, 1fr); grid-template-rows: 58px minmax(0, 1fr); }
+.prototype-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding: 0 22px; background: #fff; border-bottom: 1px solid #dfe4e1; }
+.prototype-brand { color: #176b58; font-size: 15px; font-weight: 750; letter-spacing: .02em; }
+.prototype-caption { color: #737c77; font-size: 12px; }
+.prototype-sidebar { overflow-y: auto; padding: 18px 12px; background: #fff; border-right: 1px solid #dfe4e1; }
+.prototype-nav-title { margin: 0 10px 12px; color: #7a837e; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.prototype-nav { display: grid; gap: 3px; }
+.prototype-nav button { width: 100%; min-height: 38px; padding: 8px 10px; border: 0; border-radius: 4px; background: transparent; color: #414944; font: inherit; text-align: left; cursor: pointer; }
+.prototype-nav button:hover { background: #f1f5f3; }
+.prototype-nav button[aria-current='page'] { background: #e7f2ee; color: #176b58; font-weight: 650; }
+.prototype-stage { overflow: auto; min-width: 0; padding: 20px; }
+.prototype-stage .board { width: max-content; min-width: 100%; margin: 0 auto; }
+.prototype-stage .board iframe { display: block; width: 1280px !important; height: min(820px, calc(100vh - 98px)) !important; border: 0; background: #fff; }
+.prototype-stage .board.mobile-screen iframe { width: 390px !important; height: min(844px, calc(100vh - 98px)) !important; }
+@media (max-width: 720px) {
+    .prototype-app { grid-template-columns: 1fr; grid-template-rows: 52px auto minmax(0, 1fr); }
+    .prototype-header { padding: 0 14px; }
+    .prototype-sidebar { padding: 8px; border-right: 0; border-bottom: 1px solid #dfe4e1; }
+    .prototype-nav-title { display: none; }
+    .prototype-nav { display: flex; overflow-x: auto; }
+    .prototype-nav button { width: auto; flex: 0 0 auto; white-space: nowrap; }
+    .prototype-stage { grid-row: 3; padding: 8px; }
+}
