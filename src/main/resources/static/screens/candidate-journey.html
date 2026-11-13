@@ -2,6 +2,8 @@
 <html lang="ru"><head><script>window.__resources = {"https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js": "../js/vendor/react.production.min.js", "https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js": "../js/vendor/react-dom.production.min.js"};</script>
     <meta charset="utf-8">
     <title>Candidate journey</title>
+    <script src="../js/vendor/react.production.min.js"></script>
+    <script src="../js/vendor/react-dom.production.min.js"></script>
     <script src="../js/vendor/dc-runtime.js"></script>
     <style>aside[style^="flex: 0 0 232px"]{display:none!important}main{flex:1 1 100%!important;width:100%!important}</style></head>
 <body>
@@ -338,3 +340,36 @@
             <div style="padding: 24px 22px; display: flex; flex-direction: column; gap: 14px; height: 100%; box-sizing: border-box">
                 <h1 style="margin: 0; font-size: 22px; font-weight: 700">Choose a time</h1>
                 <div style="font-size: 13px; color: #5F5F5A">Your time zone: Warsaw, GMT+1</div>
+                <div style="display: flex; flex-direction: column; gap: 10px; font-size: 16px">
+                    <!-- Sample slots: replace with the real slot list from the backend. -->
+                    <div style="min-height: 52px; box-sizing: border-box; display: flex; align-items: center; padding: 0 16px; border: 1px solid #D6D6D0; background: #FFFFFF; border-radius: 12px">Tue, Nov 10 · 10:00</div>
+                    <div style="min-height: 52px; box-sizing: border-box; display: flex; align-items: center; padding: 0 16px; border: 1px solid #D6D6D0; background: #FFFFFF; border-radius: 12px">Wed, Nov 11 · 14:00</div>
+                    <div style="min-height: 52px; box-sizing: border-box; display: flex; align-items: center; padding: 0 16px; border: 1px solid #D6D6D0; background: #FFFFFF; border-radius: 12px">Thu, Nov 12 · 16:00</div>
+                </div>
+                <div style="margin-top: auto; display: flex; gap: 10px">
+                    <button sc-camel-on-click="{{ goResult }}" style="flex: 0 0 96px; min-height: 52px; border: 1px solid #D6D6D0; border-radius: 12px; background: #FFFFFF; font-size: 15px; cursor: pointer">Back</button>
+                    <button sc-camel-on-click="{{ goLanding }}" style="flex: 1; min-height: 52px; border: 0; border-radius: 12px; background: #0F766E; color: #FFFFFF; font-size: 16px; font-weight: 600; cursor: pointer">Confirm time</button>
+                </div>
+            </div>
+        </sc-if>
+    </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}">
+    class Component extends DCLogic {
+    constructor(props) {
+        super(props);
+        this.state = {screen: 'landing'};
+    }
+    renderVals() {
+        const s = this.state.screen;
+        return {isLanding: s === 'landing', isConsent: s === 'consent', isQ: s === 'q', isResult: s === 'result', isSlots: s === 'slots',
+            goLanding: this.goLanding, goConsent: this.goConsent, goQ: this.goQ, goResult: this.goResult, goSlots: this.goSlots};
+    }
+    goLanding = () => this.setState({screen: 'landing'});
+    goConsent = () => this.setState({screen: 'consent'});
+    goQ = () => this.setState({screen: 'q'});
+    goResult = () => this.setState({screen: 'result'});
+    goSlots = () => this.setState({screen: 'slots'});
+    }
+</script>
+</body></html>
